@@ -1,4 +1,7 @@
-﻿using ControlGastos.Api.Data;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+
+using ControlGastos.Api.Data;
 using ControlGastos.Api.Dtos;
 using ControlGastos.Api.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ControlGastos.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class CategoriasController : ControllerBase
@@ -13,7 +17,7 @@ public class CategoriasController : ControllerBase
     private readonly AppDbContext _context;
 
     // TEMPORAL: se reemplazará por el usuario del token JWT
-    private const int UsuarioIdTemporal = 1;
+    private int UsuarioId => int.Parse(User.FindFirstValue("sub")!);
 
     public CategoriasController(AppDbContext context)
     {
@@ -24,7 +28,7 @@ public class CategoriasController : ControllerBase
     public async Task<ActionResult<List<CategoriaDto>>> GetAll()
     {
         var categorias = await _context.Categorias
-            .Where(c => c.UsuarioId == UsuarioIdTemporal)
+            .Where(c => c.UsuarioId == UsuarioId)
             .OrderBy(c => c.Nombre)
             .Select(c => new CategoriaDto
             {
@@ -42,7 +46,7 @@ public class CategoriasController : ControllerBase
     public async Task<ActionResult<CategoriaDto>> GetById(int id)
     {
         var c = await _context.Categorias
-            .FirstOrDefaultAsync(x => x.Id == id && x.UsuarioId == UsuarioIdTemporal);
+            .FirstOrDefaultAsync(x => x.Id == id && x.UsuarioId == UsuarioId);
 
         if (c is null) return NotFound();
 
@@ -57,7 +61,7 @@ public class CategoriasController : ControllerBase
             Nombre = dto.Nombre,
             Tipo = dto.Tipo,
             Color = dto.Color,
-            UsuarioId = UsuarioIdTemporal
+            UsuarioId = UsuarioId
         };
 
         _context.Categorias.Add(categoria);
@@ -78,7 +82,7 @@ public class CategoriasController : ControllerBase
     public async Task<IActionResult> Update(int id, CategoriaCreateDto dto)
     {
         var categoria = await _context.Categorias
-            .FirstOrDefaultAsync(x => x.Id == id && x.UsuarioId == UsuarioIdTemporal);
+            .FirstOrDefaultAsync(x => x.Id == id && x.UsuarioId == UsuarioId);
 
         if (categoria is null) return NotFound();
 
@@ -94,7 +98,7 @@ public class CategoriasController : ControllerBase
     public async Task<IActionResult> Delete(int id)
     {
         var categoria = await _context.Categorias
-            .FirstOrDefaultAsync(x => x.Id == id && x.UsuarioId == UsuarioIdTemporal);
+            .FirstOrDefaultAsync(x => x.Id == id && x.UsuarioId == UsuarioId);
 
         if (categoria is null) return NotFound();
 
