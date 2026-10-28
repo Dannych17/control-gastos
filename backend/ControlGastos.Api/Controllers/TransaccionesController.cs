@@ -1,12 +1,15 @@
-﻿using System.Linq.Expressions;
-using ControlGastos.Api.Data;
+﻿using ControlGastos.Api.Data;
 using ControlGastos.Api.Dtos;
 using ControlGastos.Api.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
+using System.Security.Claims;
 
 namespace ControlGastos.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class TransaccionesController : ControllerBase
@@ -14,7 +17,7 @@ public class TransaccionesController : ControllerBase
     private readonly AppDbContext _context;
 
     // TEMPORAL: se reemplazará por el usuario del token JWT
-    private const int UsuarioIdTemporal = 1;
+    private int UsuarioId => int.Parse(User.FindFirstValue("sub")!);
 
     public TransaccionesController(AppDbContext context)
     {
@@ -36,7 +39,7 @@ public class TransaccionesController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<TransaccionDto>>> GetAll([FromQuery] int? anio, [FromQuery] int? mes)
     {
-        var query = _context.Transacciones.Where(t => t.UsuarioId == UsuarioIdTemporal);
+        var query = _context.Transacciones.Where(t => t.UsuarioId == UsuarioId);
 
         if (anio.HasValue && mes.HasValue)
         {
@@ -60,7 +63,7 @@ public class TransaccionesController : ControllerBase
     public async Task<ActionResult<TransaccionDto>> GetById(int id)
     {
         var transaccion = await _context.Transacciones
-            .Where(t => t.Id == id && t.UsuarioId == UsuarioIdTemporal)
+            .Where(t => t.Id == id && t.UsuarioId == UsuarioId)
             .Select(ToDto)
             .FirstOrDefaultAsync();
 
@@ -82,7 +85,7 @@ public class TransaccionesController : ControllerBase
         var fin = inicio.AddMonths(1);
 
         var delMes = _context.Transacciones
-            .Where(t => t.UsuarioId == UsuarioIdTemporal && t.Fecha >= inicio && t.Fecha < fin);
+            .Where(t => t.UsuarioId == UsuarioId && t.Fecha >= inicio && t.Fecha < fin);
 
         var totalIngresos = await delMes
             .Where(t => t.Categoria!.Tipo == TipoMovimiento.Ingreso)
@@ -119,7 +122,7 @@ public class TransaccionesController : ControllerBase
     public async Task<ActionResult<TransaccionDto>> Create(TransaccionCreateDto dto)
     {
         var categoriaValida = await _context.Categorias
-            .AnyAsync(c => c.Id == dto.CategoriaId && c.UsuarioId == UsuarioIdTemporal);
+            .AnyAsync(c => c.Id == dto.CategoriaId && c.UsuarioId == UsuarioId);
 
         if (!categoriaValida) return BadRequest("La categoría no existe.");
 
@@ -129,7 +132,7 @@ public class TransaccionesController : ControllerBase
             Fecha = dto.Fecha,
             Descripcion = dto.Descripcion,
             CategoriaId = dto.CategoriaId,
-            UsuarioId = UsuarioIdTemporal
+            UsuarioId = UsuarioId
         };
 
         _context.Transacciones.Add(transaccion);
@@ -147,12 +150,12 @@ public class TransaccionesController : ControllerBase
     public async Task<IActionResult> Update(int id, TransaccionCreateDto dto)
     {
         var transaccion = await _context.Transacciones
-            .FirstOrDefaultAsync(t => t.Id == id && t.UsuarioId == UsuarioIdTemporal);
+            .FirstOrDefaultAsync(t => t.Id == id && t.UsuarioId == UsuarioId);
 
         if (transaccion is null) return NotFound();
 
         var categoriaValida = await _context.Categorias
-            .AnyAsync(c => c.Id == dto.CategoriaId && c.UsuarioId == UsuarioIdTemporal);
+            .AnyAsync(c => c.Id == dto.CategoriaId && c.UsuarioId == UsuarioId);
 
         if (!categoriaValida) return BadRequest("La categoría no existe.");
 
@@ -169,7 +172,7 @@ public class TransaccionesController : ControllerBase
     public async Task<IActionResult> Delete(int id)
     {
         var transaccion = await _context.Transacciones
-            .FirstOrDefaultAsync(t => t.Id == id && t.UsuarioId == UsuarioIdTemporal);
+            .FirstOrDefaultAsync(t => t.Id == id && t.UsuarioId == UsuarioId);
 
         if (transaccion is null) return NotFound();
 
