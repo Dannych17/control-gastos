@@ -85,11 +85,27 @@ Aplicación web para gestionar finanzas personales: registra ingresos y gastos, 
    ```
 3. Abre `http://localhost:5173`, crea una cuenta y empieza a registrar movimientos.
 
+## Pruebas
+
+El backend tiene pruebas unitarias con xUnit y una base de datos en memoria (no requieren SQL Server):
+
+- Resumen mensual: totales de ingresos, gastos y balance, y agrupación por categoría
+- Aislamiento entre usuarios: nadie ve los datos de otra cuenta
+- Validaciones: mes inválido y categorías ajenas
+- Autenticación: registro, correo duplicado, login correcto e incorrecto
+
+Para ejecutarlas:
+
+```
+cd backend/ControlGastos.Tests
+dotnet test
+```
+
 ## Próximos pasos
 
 - [x] API REST con autenticación
 - [x] Frontend con dashboard y gráficos
-- [ ] Pruebas unitarias
+- [x] Pruebas unitarias
 - [ ] Docker y despliegue en la nube
 
 ## Autor
