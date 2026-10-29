@@ -17,6 +17,11 @@ Aplicación web para gestionar finanzas personales: registra ingresos y gastos, 
 - React Router
 - Recharts (gráficos)
 
+**Infraestructura**
+
+- Docker y Docker Compose
+- Nginx (para servir el frontend)
+
 ## Funcionalidades
 
 - Registro e inicio de sesión de usuarios
@@ -52,7 +57,31 @@ Aplicación web para gestionar finanzas personales: registra ingresos y gastos, 
 | PUT / DELETE | /api/transacciones/{id}    | Editar y borrar transacción      |
 | GET          | /api/transacciones/resumen | Resumen mensual                  |
 
-## Cómo ejecutarlo
+## Ejecutar con Docker (recomendado)
+
+Solo necesitas [Docker Desktop](https://www.docker.com/products/docker-desktop/). No hace falta instalar .NET, Node ni SQL Server.
+
+1. Clona el repositorio y entra a la carpeta del proyecto.
+2. Crea tu archivo de variables a partir de la plantilla:
+   ```
+   copy .env.example .env
+   ```
+   (en Linux o Mac: `cp .env.example .env`)
+3. Abre `.env` y cambia los valores:
+   - `DB_PASSWORD`: contraseña de SQL Server (mínimo 8 caracteres, con mayúsculas, minúsculas y números; sin `;`, `=` ni espacios).
+   - `JWT_KEY`: una clave aleatoria de más de 32 caracteres.
+4. Levanta todo:
+   ```
+   docker compose up --build
+   ```
+5. Abre la aplicación:
+   - Web: http://localhost:3000
+   - API y Swagger: http://localhost:8080/swagger
+
+Para apagar los contenedores conservando los datos: `docker compose down`.
+Para apagarlos y borrar también la base de datos: `docker compose down -v`.
+
+## Ejecutar sin Docker
 
 ### Requisitos
 
@@ -106,7 +135,8 @@ dotnet test
 - [x] API REST con autenticación
 - [x] Frontend con dashboard y gráficos
 - [x] Pruebas unitarias
-- [ ] Docker y despliegue en la nube
+- [x] Docker
+- [ ] Despliegue en la nube
 
 ## Autor
 
