@@ -130,14 +130,6 @@ cd backend/ControlGastos.Tests
 dotnet test
 ```
 
-## Próximos pasos
-
-- [x] API REST con autenticación
-- [x] Frontend con dashboard y gráficos
-- [x] Pruebas unitarias
-- [x] Docker
-- [ ] Despliegue en la nube
-
 ## Autor
 
 Danny Chilan · [GitHub](https://github.com/Dannych17)
